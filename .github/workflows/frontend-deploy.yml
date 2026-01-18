@@ -30,13 +30,8 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./dist/ # এটি নিশ্চিত করুন
-          server-dir: ./     # এটি নিশ্চিত করুন
+          local-dir: ./dist/
+          server-dir: ./
           protocol: ftp
           port: 21
-
-          - name: FTP Deploy to cPanel
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
-        with:
-          # ... আগের সব ঠিক থাকবে
-          dangerous-clean-slate: false # এটি যোগ করুন
+          dangerous-clean-slate: false
