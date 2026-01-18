@@ -24,6 +24,9 @@ jobs:
       - name: Build Project
         run: npm run build
 
+        - name: Install Dependencies
+        run: npm install  # এখানে npm ci থাকলে সেটি কেটে npm install দিন
+
       - name: FTP Deploy to cPanel
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
