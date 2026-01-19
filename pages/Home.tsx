@@ -1,15 +1,16 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; // useEffect এবং useState যোগ করা হয়েছে
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, Quote, Megaphone, Code2, Search, PenTool, Smartphone, BarChart3, Video, Target, Zap, TrendingUp, ShieldCheck, Plus, Minus, Check } from 'lucide-react';
 import HeroSlider from '../components/HeroSlider';
-import { CLIENT_LOGOS, TESTIMONIALS, SERVICES, PORTFOLIO } from '../constants';
+import { CLIENT_LOGOS, TESTIMONIALS, API_BASE } from '../constants'; // API_BASE ইমপোর্ট করা হয়েছে
 
 const IconMap: Record<string, any> = { Megaphone, Code2, Search, PenTool, Smartphone, BarChart3, Video, Target };
 
 const ServiceCard: React.FC<{ service: any }> = ({ service }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const Icon = IconMap[service.icon] || Target;
+  
+  // ডাটাবেস থেকে আসা ফিচারের লিস্ট চেক করা
   const initialFeatures = service.features?.slice(0, 3) || [];
   const extraFeatures = service.features?.slice(3) || [];
 
@@ -56,11 +57,31 @@ const ServiceCard: React.FC<{ service: any }> = ({ service }) => {
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
+  
+  // ডাটাবেস থেকে আসা ডাটা রাখার জন্য স্টেট
+  const [dbServices, setDbServices] = useState<any[]>([]);
+  const [dbPortfolio, setDbPortfolio] = useState<any[]>([]);
+
+  // ডাটা ফেচ করার জন্য useEffect
+  useEffect(() => {
+    // সার্ভিস ফেচ করা
+    fetch(`${API_BASE}/get-services.php`)
+      .then(res => res.json())
+      .then(data => setDbServices(data))
+      .catch(err => console.error("Error fetching services:", err));
+
+    // পোর্টফোলিও ফেচ করা
+    fetch(`${API_BASE}/get-portfolio.php`)
+      .then(res => res.json())
+      .then(data => setDbPortfolio(data))
+      .catch(err => console.error("Error fetching portfolio:", err));
+  }, []);
 
   return (
     <div className="overflow-hidden">
       <HeroSlider />
 
+      {/* ক্লায়েন্ট লোগো সেকশন */}
       <section className="py-20 bg-white border-b border-gray-100 overflow-hidden">
         <div className="container mx-auto px-6 mb-12">
           <p className="text-center text-gray-400 font-bold uppercase tracking-[0.2em] text-xs">Trusted by Growing Businesses Worldwide</p>
@@ -74,19 +95,25 @@ const Home: React.FC = () => {
         </div>
       </section>
 
+      {/* ডাইনামিক সার্ভিস সেকশন */}
       <section className="py-24 bg-gray-50">
         <div className="container mx-auto px-6">
           <div className="text-center max-w-3xl mx-auto mb-20">
             <span className="text-[#00695c] font-bold text-sm uppercase tracking-widest mb-4 block">Our Solutions</span>
             <h2 className="text-4xl md:text-5xl font-extrabold text-[#014034] mb-6">Engineered for Business Outcomes</h2>
-            <p className="text-gray-600 text-xl leading-relaxed">We focus on metrics that matter. Tangible growth over vanity metrics.</p>
+            <p className="text-gray-600 text-xl leading-relaxed">We focus on metrics that matter.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {SERVICES.map((s) => <ServiceCard key={s.id} service={s} />)}
+            {dbServices.length > 0 ? (
+              dbServices.map((s) => <ServiceCard key={s.id} service={s} />)
+            ) : (
+              <p className="text-center col-span-full text-gray-400">Loading services from database...</p>
+            )}
           </div>
         </div>
       </section>
 
+      {/* এডভান্টেজ সেকশন (স্ট্যাটিক) */}
       <section className="py-24 bg-white">
         <div className="container mx-auto px-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
@@ -109,7 +136,7 @@ const Home: React.FC = () => {
                 {[
                   { title: "Strategy-First Approach", desc: "Every pixel aligned with your bottom line.", icon: Target },
                   { title: "Everything Under One Roof", desc: "Unified design, dev, and growth team.", icon: Zap },
-                  { title: "Business Results Over Vanity", desc: "Leds and sales over likes and clicks.", icon: TrendingUp }
+                  { title: "Business Results Over Vanity", desc: "Leads and sales over likes and clicks.", icon: TrendingUp }
                 ].map((item, idx) => (
                   <div key={idx} className="flex items-start space-x-5">
                     <div className="bg-[#014034]/5 p-2 rounded-lg text-[#014034]"><item.icon size={24} /></div>
@@ -127,6 +154,7 @@ const Home: React.FC = () => {
         </div>
       </section>
 
+      {/* টেস্টিমোনিয়াল সেকশন */}
       <section className="py-24 bg-gray-50 overflow-hidden">
         <div className="container mx-auto px-6 mb-16 text-center">
           <h2 className="text-4xl font-extrabold text-[#014034]">Real Results for Ambitious Brands</h2>
@@ -147,6 +175,7 @@ const Home: React.FC = () => {
         </div>
       </section>
 
+      {/* ডাইনামিক পোর্টফোলিও সেকশন */}
       <section className="py-24 bg-white border-t border-gray-100">
         <div className="container mx-auto px-6 mb-16 flex flex-col md:flex-row justify-between items-end">
           <div><span className="text-[#00695c] font-bold text-sm uppercase mb-4 block">Case Studies</span><h2 className="text-4xl font-extrabold text-[#014034]">Featured Success Stories</h2></div>
@@ -154,20 +183,25 @@ const Home: React.FC = () => {
         </div>
         <div className="relative flex whitespace-nowrap overflow-hidden py-10">
           <div className="flex animate-marquee space-x-12 px-12">
-            {[...PORTFOLIO, ...PORTFOLIO].map((p, idx) => (
-              <div key={idx} onClick={() => navigate(`/portfolio/${p.id}`)} className="group relative inline-block w-[400px] aspect-[4/3] rounded-[2.5rem] overflow-hidden shadow-lg cursor-pointer shrink-0">
-                <img src={p.imageUrl} alt={p.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#014034] via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-8">
-                  <span className="text-[#4DB6AC] font-bold text-xs uppercase mb-2">{p.category}</span>
-                  <h3 className="text-2xl font-bold text-white mb-2">{p.title}</h3>
-                  <p className="text-gray-200 text-sm">Client: {p.client}</p>
+            {dbPortfolio.length > 0 ? (
+              [...dbPortfolio, ...dbPortfolio].map((p, idx) => (
+                <div key={idx} onClick={() => navigate(`/portfolio/${p.id}`)} className="group relative inline-block w-[400px] aspect-[4/3] rounded-[2.5rem] overflow-hidden shadow-lg cursor-pointer shrink-0">
+                  <img src={p.imageUrl} alt={p.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#014034] via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-8">
+                    <span className="text-[#4DB6AC] font-bold text-xs uppercase mb-2">{p.category}</span>
+                    <h3 className="text-2xl font-bold text-white mb-2">{p.title}</h3>
+                    <p className="text-gray-200 text-sm">Client: {p.client}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p className="text-white bg-[#014034] p-4 rounded-xl">Loading case studies...</p>
+            )}
           </div>
         </div>
       </section>
 
+      {/* CTA সেকশন */}
       <section className="py-24 bg-white">
         <div className="container mx-auto px-6">
           <div className="deep-green-gradient rounded-[4rem] p-12 md:p-24 text-center text-white shadow-2xl relative overflow-hidden">
