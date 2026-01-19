@@ -1,7 +1,6 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { SERVICES } from '../constants';
+import { API_BASE } from '../constants'; // API_BASE ইমপোর্ট করা হয়েছে
 import * as LucideIcons from 'lucide-react';
 import { ArrowRight, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react';
 import { Service } from '../types';
@@ -48,6 +47,22 @@ const ServiceCard: React.FC<{ service: Service }> = ({ service }) => {
 };
 
 const Services: React.FC = () => {
+  const [dbServices, setDbServices] = useState<Service[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(`${API_BASE}/get-services.php`) // ডাটাবেস থেকে সার্ভিস ফেচ করা
+      .then(res => res.json())
+      .then(data => {
+        setDbServices(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error("Error:", err);
+        setLoading(false);
+      });
+  }, []);
+
   return (
     <div className="pt-32 pb-24 bg-white">
       <div className="container mx-auto px-6">
@@ -56,9 +71,15 @@ const Services: React.FC = () => {
           <h1 className="text-5xl md:text-6xl font-extrabold text-[#014034] mb-8 leading-tight">Our Growth Ecosystem</h1>
           <p className="text-xl text-gray-600 leading-relaxed">Systems over services. Every offering removes bottlenecks and accelerates growth.</p>
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {SERVICES.map((s) => <ServiceCard key={s.id} service={s} />)}
-        </div>
+
+        {loading ? (
+          <div className="text-center py-20 text-[#014034] font-bold">Loading Services...</div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            {dbServices.map((s) => <ServiceCard key={s.id} service={s} />)}
+          </div>
+        )}
+
         <div className="mt-24 bg-gray-50 p-12 md:p-20 rounded-[4rem] text-center border border-gray-100">
           <h2 className="text-4xl md:text-5xl font-extrabold text-[#014034] mb-6">Need a custom growth bundle?</h2>
           <Link to="/get-quote" className="bg-[#00695c] text-white px-12 py-5 rounded-2xl font-extrabold text-xl hover:bg-[#014034] transition-all shadow-xl inline-flex items-center">
