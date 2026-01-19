@@ -1,6 +1,8 @@
 
 import { Service, PortfolioProject, Testimonial, BlogPost, HeroSlide, PricingPlan, SiteSettings } from './types';
 
+export const API_BASE = import.meta.env.VITE_API_BASE;
+
 export const COLORS = {
   primary: '#014034',
   primaryLight: '#00695c',
